@@ -27,7 +27,7 @@ public class Reader {
     }
 
     /**
-     * Reads from System.in until it gets an empty line.
+     * Reads from System.in until it gets a e
      * @return
      */
     public ArrayList<String> readInput () {
