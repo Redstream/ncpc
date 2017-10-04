@@ -28,5 +28,11 @@ public class Main {
         /*for(Tree t :roots.values()){
             t.printWordsInTree();
         }*/
+
+        List<String> wordsToType = r.wordsToType;
+
+        for(String word : wordsToType) {
+            roots.get(word.charAt(0)).calculate(word);
+        }
     }
 }

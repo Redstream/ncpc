@@ -57,4 +57,48 @@ public class Tree {
             printHelp(child);
         }
     }
+
+    //Calculates how many keystrokes you have to do in order to type this word using this tree
+    public int calculate (String word) {
+        int minStrokes = word.length();     //Initialize minimal to length of word (just writing it out)
+        int strokes = 1;                    //Initialize to 1 in order to assume that first character of word has been written
+
+        char[] chars = word.toCharArray();
+        FindResult res = this.findBestMatch(chars);
+
+        return 0;
+    }
+
+    //Find the string in the tree that matches the input the best
+    public FindResult findBestMatch (char[] chars) {
+        Node current = root;
+        FindResult result = new FindResult();
+        findBestMatchHelp(current, chars, result, 0);
+        return result;
+    }
+
+    public void findBestMatchHelp (Node current, char[] remaining, FindResult result, int index) {
+        if(current.content == remaining[index]) {   //If the content of the current node matches the current character
+
+            index++;                                //Look at the next char
+
+            for(int i = 0; i < current.children.size(); i++) {
+                Node nextChild = current.children.get(i);       //Get next child to process
+                if(nextChild.content == remaining[index]) {     //If this child's contents match with the next char, go there
+
+                    findBestMatchHelp();
+                }
+            }
+
+            return;
+        }
+        else {      //No match, this is the best possible match, return
+            return;
+        }
+    }
+
+    class FindResult {
+        int tabs;
+
+    }
 }
