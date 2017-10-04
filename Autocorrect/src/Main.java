@@ -18,10 +18,15 @@ public class Main {
                 charTree = roots.get(firstChar);    //Fetch tree
             }
             else {
-                charTree = new Tree(new Node(false, a));
+                charTree = new Tree(new Node(false, firstChar, null));  //Create a tree if there isn't one
+                roots.put(firstChar, charTree);                         //Add to map
             }
 
             charTree.add(s);                    //Add word to tree
         }
+
+        /*for(Tree t :roots.values()){
+            t.printWordsInTree();
+        }*/
     }
 }
