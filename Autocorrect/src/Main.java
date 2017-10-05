@@ -1,11 +1,14 @@
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        MyReader r = new MyReader(Paths.get("in.txt"));
+        MyReader r = new MyReader(Paths.get("./testdata/07-generated.in"));
         r.read();
 
         List<String> wordsInDictionary = r.wordsInDictionary;
@@ -58,16 +61,38 @@ public class Main {
             }
         }*/
 
+        List<Integer> myAnswers = new LinkedList<>();
         for(String word : wordsToType) {
-            System.out.println("\n" + word);
             char c = word.charAt(0);
             Tree t = roots.get(c);
             if(t == null) {
-                System.out.println("Tree doesnt exist");
-                System.out.println(word.length());
+                myAnswers.add(word.length());
             }
             else {
-                System.out.println(t.calculate(word));
+                int answer = t.calculate(word);
+                myAnswers.add(answer);
+            }
+        }
+
+        List<Integer> theirAnswers = new LinkedList<>();
+        try {
+            List<String> readAnswers = Files.readAllLines(Paths.get("./testdata/07-generated.ans"));
+            for(String ans : readAnswers) {
+                theirAnswers.add(Integer.parseInt(ans));
+            }
+
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+        }
+
+        for(int i = 0; i < theirAnswers.size(); i++) {
+            if(theirAnswers.get(i).intValue() != myAnswers.get(i).intValue()) {
+                System.out.println("Failed!");
+                System.out.println("My answer:" + myAnswers.get(i) + ", their answer: " + theirAnswers.get(i));
+            }
+            else {
+                //System.out.println("Success");
             }
         }
     }

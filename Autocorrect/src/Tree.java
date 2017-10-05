@@ -47,7 +47,7 @@ public class Tree {
         if (n.isWord()) {
             Node parNode = n;                           //Set parent to node initially
             List<Character> chars = new LinkedList<>(); //Chars to print
-            while (parNode != null) {             //Loop until root
+            while (parNode != null) {                   //Loop until root
                 chars.add(parNode.content);             //Add character to list
                 parNode = parNode.parent;               //Repoint parNode
             }
@@ -70,19 +70,18 @@ public class Tree {
 
         char[] chars = word.toCharArray();
         FindResult res = this.findBestMatch(chars);
-        strokes = res.cost + res.extra;                             //Get cost to reach index
+        strokes = res.cost + res.extra;                 //Get cost to reach index, add cost of potentially erasing
         int index = res.index;                          //Get the character we've reached
-        while(index < chars.length) {
+        while(index < chars.length) {                   //Add remaining keystrokes if any
             strokes++;
             index++;
         }
-        //System.out.print("Cost: " + strokes);
+
         if(strokes < minStrokes) {
-            return strokes;
+            minStrokes = strokes;
         }
-        else {
-            return minStrokes;
-        }
+
+        return minStrokes;
     }
 
     //Find the string in the tree that matches the input the best
@@ -94,7 +93,7 @@ public class Tree {
     public FindResult findBestMatchHelp (Node current, char[] chars, int index, int costThisFar, boolean tabPossibleIn, int tabsTraversed) {
         Node next = null;
         boolean tabPossible = false;
-        for(int i = 0; i < current.children.size(); i++) {  //Find the next node to go to
+        for(int i = 0; (i < current.children.size()) && (index < chars.length); i++) {  //Find the next node to go to if there are letters left
             Node child = current.children.get(i);           //Get current child
             if(child != null) {                             //If the child isn't null
                 if(child.content == chars[index]) {         //If the contents match, go here next
@@ -109,51 +108,45 @@ public class Tree {
 
         FindResult result = null;
 
-        if(next == null) {          //If next is null we got no where to go, return
-            if(tabPossibleIn) {         //If we could tab here
-                int extra = 0;
+        if(next == null) {                      //If next is null we got no where to go, return
+            if(tabPossibleIn) {                 //If we could tab here
+                int extra = 0;                  //Calculate if we need to remove any character
                 next = current.children.get(0); //Get leftmost child
-                while(next != null) {
-                    extra++;
+                while(next != null) {           //As long as there is a left child
+                    extra++;                    //Increment
                     next = next.children.get(0); //Get leftmost child
                 }
                 return new FindResult(costThisFar,index, extra);
             }
             else {
-                costThisFar++;
-                int extra = 0;
-                next = current.children.get(0); //Get leftmost child
-                while(next != null) {
-                    extra++;
-                    next = next.children.get(0); //Get leftmost child
-                }
-                return new FindResult(costThisFar,index, extra);
+                costThisFar++;                  //If we didn't tab here, just increase cost and return
+                return new FindResult(costThisFar,index, 0);
             }
         }
         if(next != null) {          //If next is not null we know where to go next.
             index++;                //Increment index before next recursive call
             if(tabPossibleIn && tabPossible) {   //If it was possible to tab to this node and we can continue to tab
-                tabsTraversed ++;                //Keep track of nodes we've traversed by tabbing
+                tabsTraversed ++;                //Increment tabsTraversed when moving to next
                 result = findBestMatchHelp(next, chars, index, costThisFar, true, tabsTraversed);
             }
-            else if(!tabPossibleIn && tabPossible) {    //If we couldn't tab to the current node but can tab to next
-                tabsTraversed = 0;
-                costThisFar++;
+            else if(!tabPossibleIn && tabPossible) {    //If we couldn't tab to the current node but can tab to next,
+                tabsTraversed = 0;                      //Initialize tabs traversed
+                costThisFar++;                          //Increment since either we will press tab or press the key to move to next
                 result = findBestMatchHelp(next, chars, index, costThisFar, true, tabsTraversed);
             }
-            else if(tabPossibleIn && !tabPossible){     //If we could tab here but we can't continue tabbing
-                int costOfTab = calculateTabCost(current); //Calculate cost of tabbing here, tab + possible backspaces
-                if(costOfTab < tabsTraversed) { //If it was cheaper to tab here, add that cost to costThisFar, otherwise take cost of keystrokes
+            else if(tabPossibleIn && !tabPossible){         //If we could tab here but we can't continue tabbing
+                int costOfTab = calculateTabCost(current);  //Calculate cost of tabbing here, tab + possible backspaces
+                if(costOfTab < tabsTraversed) {             //If it was cheaper to tab here, add that cost to costThisFar, otherwise take cost of keystrokes
                     costThisFar += costOfTab;
                 }
                 else {
                     costThisFar += tabsTraversed;
                 }
-                costThisFar++;
+                costThisFar++;                              //Add cost of moving to next
                 result = findBestMatchHelp(next, chars, index, costThisFar, false, 0 ); //?????
             }
             else { // !tabPossibleIn !tabPossible - not possible to tab
-                costThisFar++;      //Add cost of keystroke
+                costThisFar++;      //Add cost of moving to next
                 result = findBestMatchHelp(next, chars, index, costThisFar, false, 0);
             }
         }

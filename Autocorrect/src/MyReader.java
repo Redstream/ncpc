@@ -20,7 +20,7 @@ public class MyReader {
 
             String[] firstLine = readWords.get(0).split("[\\s]");       //Split on space
             int nrOfWordsInDictionary = Integer.parseInt(firstLine[0]);
-            int nrOfWordsToType = Integer.parseInt(firstLine[0]);
+            int nrOfWordsToType = Integer.parseInt(firstLine[1]);
             readWords.remove(0);                                        //Remove when info has been retrieved
 
             System.out.println("Words in dictionary: " + nrOfWordsInDictionary);
