@@ -29,10 +29,37 @@ public class Main {
             t.printWordsInTree();
         }*/
 
+
         List<String> wordsToType = r.wordsToType;
 
-        for(String word : wordsToType) {
-            roots.get(word.charAt(0)).calculate(word);
+        //Test of calculation of tabs
+        String austria = "autocorrect";
+        char[] chars = austria.toCharArray();
+        Tree tree = roots.get(chars[0]);
+        Node node = tree.root;
+        int index = 1;
+        while(true) {
+            Node next = null;
+            for(int i = 0; i < node.children.size(); i++) {
+                Node child = node.children.get(i);
+                if(child != null) {
+                    if(child.content == chars[index] && i == 0) {
+                        next = child;
+                    }
+                }
+            }
+            if(next == null) { //We're at the end
+                System.out.println(tree.calculateTabCost(node)+1);
+                break;
+            }
+            else {
+                node = next;
+                index++;
+            }
         }
+
+        /*for(String word : wordsToType) {
+            roots.get(word.charAt(0)).calculate(word);
+        }*/
     }
 }
