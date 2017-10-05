@@ -33,7 +33,7 @@ public class Main {
         List<String> wordsToType = r.wordsToType;
 
         //Test of calculation of tabs
-        String austria = "autocorrect";
+        /*String austria = "autocorrect";
         char[] chars = austria.toCharArray();
         Tree tree = roots.get(chars[0]);
         Node node = tree.root;
@@ -56,10 +56,19 @@ public class Main {
                 node = next;
                 index++;
             }
-        }
-
-        /*for(String word : wordsToType) {
-            roots.get(word.charAt(0)).calculate(word);
         }*/
+
+        for(String word : wordsToType) {
+            System.out.println("\n" + word);
+            char c = word.charAt(0);
+            Tree t = roots.get(c);
+            if(t == null) {
+                System.out.println("Tree doesnt exist");
+                System.out.println(word.length());
+            }
+            else {
+                System.out.println(t.calculate(word));
+            }
+        }
     }
 }

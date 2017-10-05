@@ -66,21 +66,32 @@ public class Tree {
     //Calculates how many keystrokes you have to do in order to type this word using this tree
     public int calculate (String word) {
         int minStrokes = word.length();     //Initialize minimal to length of word (just writing it out)
-        int strokes = 1;                    //Initialize to 1 in order to assume that first character of word has been written
+        int strokes = 0;                    //Initialize to 1 in order to assume that first character of word has been written
 
         char[] chars = word.toCharArray();
         FindResult res = this.findBestMatch(chars);
-
-        return 0;
+        strokes = res.cost + res.extra;                             //Get cost to reach index
+        int index = res.index;                          //Get the character we've reached
+        while(index < chars.length) {
+            strokes++;
+            index++;
+        }
+        //System.out.print("Cost: " + strokes);
+        if(strokes < minStrokes) {
+            return strokes;
+        }
+        else {
+            return minStrokes;
+        }
     }
 
     //Find the string in the tree that matches the input the best
     public FindResult findBestMatch (char[] chars) {
-        findBestMatchHelp(root, chars, 0, 1, false, 0);
-        return null;
+        FindResult res = findBestMatchHelp(root, chars, 1, 1, false, 0);
+        return res;
     }
 
-    public void findBestMatchHelp (Node current, char[] chars, int index, int costThisFar, boolean tabPossibleIn, int tabsTraversed) {
+    public FindResult findBestMatchHelp (Node current, char[] chars, int index, int costThisFar, boolean tabPossibleIn, int tabsTraversed) {
         Node next = null;
         boolean tabPossible = false;
         for(int i = 0; i < current.children.size(); i++) {  //Find the next node to go to
@@ -91,31 +102,62 @@ public class Tree {
                     if(i == 0) {                            //If this was the leftmost child it's reachable by a tab
                         tabPossible = true;
                     }
+                    break;
                 }
             }
         }
+
+        FindResult result = null;
+
         if(next == null) {          //If next is null we got no where to go, return
-            //calculate cost to reach next
-            int cost = costThisFar;
+            if(tabPossibleIn) {         //If we could tab here
+                int extra = 0;
+                next = current.children.get(0); //Get leftmost child
+                while(next != null) {
+                    extra++;
+                    next = next.children.get(0); //Get leftmost child
+                }
+                return new FindResult(costThisFar,index, extra);
+            }
+            else {
+                costThisFar++;
+                int extra = 0;
+                next = current.children.get(0); //Get leftmost child
+                while(next != null) {
+                    extra++;
+                    next = next.children.get(0); //Get leftmost child
+                }
+                return new FindResult(costThisFar,index, extra);
+            }
         }
         if(next != null) {          //If next is not null we know where to go next.
             index++;                //Increment index before next recursive call
             if(tabPossibleIn && tabPossible) {   //If it was possible to tab to this node and we can continue to tab
                 tabsTraversed ++;                //Keep track of nodes we've traversed by tabbing
-                findBestMatchHelp(next, chars, index, costThisFar, true, tabsTraversed);
+                result = findBestMatchHelp(next, chars, index, costThisFar, true, tabsTraversed);
             }
             else if(!tabPossibleIn && tabPossible) {    //If we couldn't tab to the current node but can tab to next
-                tabsTraversed++;
-                findBestMatchHelp(next, chars, index, costThisFar, true, tabsTraversed);
+                tabsTraversed = 0;
+                costThisFar++;
+                result = findBestMatchHelp(next, chars, index, costThisFar, true, tabsTraversed);
             }
             else if(tabPossibleIn && !tabPossible){     //If we could tab here but we can't continue tabbing
-                int costOfTab = 1 + calculateTabCost(current); //Check if it was beneficial to tab here, otherwise take cost of keystrokes
-                costThisFar = costThisFar + ((costOfTab < tabsTraversed)? costOfTab:tabsTraversed);     //If it was cheaper to tab here, add that cost to costThisFar, otherwise take cost of keystrokes
-                findBestMatchHelp(next, chars, index, costThisFar, false, 0 ); //?????
+                int costOfTab = calculateTabCost(current); //Calculate cost of tabbing here, tab + possible backspaces
+                if(costOfTab < tabsTraversed) { //If it was cheaper to tab here, add that cost to costThisFar, otherwise take cost of keystrokes
+                    costThisFar += costOfTab;
+                }
+                else {
+                    costThisFar += tabsTraversed;
+                }
+                costThisFar++;
+                result = findBestMatchHelp(next, chars, index, costThisFar, false, 0 ); //?????
             }
-
+            else { // !tabPossibleIn !tabPossible - not possible to tab
+                costThisFar++;      //Add cost of keystroke
+                result = findBestMatchHelp(next, chars, index, costThisFar, false, 0);
+            }
         }
-
+        return result;
     }
 
     //Given a node, which can be reached by tabbing, calculates the cost of reaching it (if anything needs to be erased beyond it)
@@ -134,7 +176,15 @@ public class Tree {
     }
 
     class FindResult {
-        int tabs;
+        int cost;
+        int index;
+        int extra;
+
+        public FindResult(int cost, int index, int extra) {
+            this.cost = cost;
+            this.index = index;
+            this.extra = extra;
+        }
 
     }
 }
