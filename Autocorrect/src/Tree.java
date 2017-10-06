@@ -70,7 +70,7 @@ public class Tree {
 
         char[] chars = word.toCharArray();
         FindResult res = this.findBestMatch(chars);
-        strokes = res.cost + res.extra;                 //Get cost to reach index, add cost of potentially erasing
+        strokes = res.cost;                 //Get cost to reach index, add cost of potentially erasing
         int index = res.index;                          //Get the character we've reached
         while(index < chars.length) {                   //Add remaining keystrokes if any
             strokes++;
@@ -82,6 +82,44 @@ public class Tree {
         }
 
         return minStrokes;
+    }
+
+    public FindResult findBestMatch2 (char[] chars) {
+        Node current = root;
+        int index = 1;
+        int costThisFar = 1;
+        boolean tabPossibleIn = false;
+        boolean tabPossible = false;
+        int tabsTraversed = 0;
+
+        while(true) {
+            Node next = null;                                                                   //Ref to next node
+            for(int i = 0; ((i < current.children.size()) && (index < chars.length)); i++) {    //Iterate through children if there are more characters
+                Node child = current.children.get(i);                   //Get next child
+                if(child != null && child.content == chars[index]) {    //If child isn't null and contents match
+                    next = child;                                       //Point next to it
+                    if(i == 0) {                                        //If leftmost child
+                        tabPossible = true;                             //Tabbing there is possible
+                    }
+                    break;                                              //Once next is found we break
+                }
+            }
+
+            if(next == null) {                                          //If next is null we didn't find a good child or we're out of characters, i.e we're done
+                if(tabPossibleIn) {     //If we could tab here
+                    int tabCost = calculateTabCost(current);          //Calculate cost of tabbing here
+                    if(tabCost < tabsTraversed) {
+                        costThisFar += tabCost;
+                    }
+                    else {
+                        costThisFar += tabsTraversed;
+                    }
+                }
+                else {                  //If we couldn't tab here
+                    return new FindResult(costThisFar, index);   //Not tabbing here means no extra cost
+                }
+            }
+        }
     }
 
     //Find the string in the tree that matches the input the best
@@ -110,17 +148,18 @@ public class Tree {
 
         if(next == null) {                      //If next is null we got no where to go, return
             if(tabPossibleIn) {                 //If we could tab here
-                int extra = 0;                  //Calculate if we need to remove any character
-                next = current.children.get(0); //Get leftmost child
-                while(next != null) {           //As long as there is a left child
-                    extra++;                    //Increment
-                    next = next.children.get(0); //Get leftmost child
+                int tabCost = calculateTabCost(current);            //Calculate cost of tabbing here
+                if(tabCost < tabsTraversed) {                       //Check if it was cheaper to tab to the end
+                    costThisFar += tabCost;
                 }
-                return new FindResult(costThisFar,index, extra);
+                else {                                              //If it wasn't, take regular cost
+                    costThisFar += tabsTraversed;
+                }
+                return new FindResult(costThisFar,index);
             }
             else {
-                costThisFar++;                  //If we didn't tab here, just increase cost and return
-                return new FindResult(costThisFar,index, 0);
+                //costThisFar++;                  //If we didn't tab here, just increase cost and return
+                return new FindResult(costThisFar,index);
             }
         }
         if(next != null) {          //If next is not null we know where to go next.
@@ -171,12 +210,10 @@ public class Tree {
     class FindResult {
         int cost;
         int index;
-        int extra;
 
-        public FindResult(int cost, int index, int extra) {
+        public FindResult(int cost, int index) {
             this.cost = cost;
             this.index = index;
-            this.extra = extra;
         }
 
     }

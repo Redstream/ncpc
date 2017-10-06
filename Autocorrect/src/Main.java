@@ -8,7 +8,9 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        MyReader r = new MyReader(Paths.get("./testdata/07-generated.in"));
+        String inFile = "./testdata/19-generated.in";
+        String ansFile = "./testdata/19-generated.ans";
+        MyReader r = new MyReader(Paths.get(inFile));
         r.read();
 
         List<String> wordsInDictionary = r.wordsInDictionary;
@@ -60,7 +62,6 @@ public class Main {
                 index++;
             }
         }*/
-
         List<Integer> myAnswers = new LinkedList<>();
         for(String word : wordsToType) {
             char c = word.charAt(0);
@@ -74,9 +75,10 @@ public class Main {
             }
         }
 
+
         List<Integer> theirAnswers = new LinkedList<>();
         try {
-            List<String> readAnswers = Files.readAllLines(Paths.get("./testdata/07-generated.ans"));
+            List<String> readAnswers = Files.readAllLines(Paths.get(ansFile));
             for(String ans : readAnswers) {
                 theirAnswers.add(Integer.parseInt(ans));
             }
@@ -86,14 +88,17 @@ public class Main {
             e.printStackTrace();
         }
 
+        int errors = 0;
         for(int i = 0; i < theirAnswers.size(); i++) {
             if(theirAnswers.get(i).intValue() != myAnswers.get(i).intValue()) {
-                System.out.println("Failed!");
+                //System.out.println("Failed!");
                 System.out.println("My answer:" + myAnswers.get(i) + ", their answer: " + theirAnswers.get(i));
+                errors++;
             }
             else {
                 //System.out.println("Success");
             }
         }
+        System.out.println("Errors: " + errors);
     }
 }
