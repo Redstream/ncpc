@@ -4,7 +4,7 @@ import java.util.Queue;
 import java.util.Scanner;
 import java.util.Stack;
 
-public class TaskE {
+public class TaskE_old {
 
 	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);
@@ -63,7 +63,6 @@ public class TaskE {
 		}
 
 		System.out.println(water);
-
 	}
 	
 	
